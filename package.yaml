@@ -1,0 +1,50 @@
+name:                hgame
+version:             0.1.0.0
+github:              epatrizio/hgame
+license:             unlicense
+author:              epatrizio
+maintainer:          epatrizio@example.com
+copyright:           epatrizio
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            A sample game in Haskell language
+# category:            Game
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/epatrizio/hgame#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- containers
+- hspec
+- QuickCheck
+
+library:
+  source-dirs: src
+
+executables:
+  paf-projet-street-fighter-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hgame
+
+tests:
+  hgame-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hgame
