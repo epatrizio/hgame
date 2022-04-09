@@ -15,3 +15,5 @@ prop_inv_hb_notEmpty (Composite s) = case s of
     Empty -> False
     _ -> True
 
+createHitbox :: Integer -> Integer -> Integer -> Integer -> Hitbox
+createHitbox x y w h = Rect (Coord x y) w h

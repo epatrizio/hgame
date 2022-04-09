@@ -24,7 +24,7 @@ coordUT = do
     it "Right movement OK" $
       moveSafe (Zone 50 50) (Coord 0 0) (Mov R 10) `shouldBe` (Coord 10 0)
     it "Left movement OK" $
-      moveSafe (Zone 50 50) (Coord 0 0) (Mov L 10) `shouldBe` (Coord (-10) 0)
+      moveSafe (Zone 50 50) (Coord 10 0) (Mov L 10) `shouldBe` (Coord 0 0)
     it "Up movement KO" $
       moveSafe (Zone 5 5) (Coord 0 0) (Mov U 10) `shouldBe` (Coord 0 0)
     it "Down movement KO" $
@@ -48,8 +48,8 @@ genZoneKo = do
 
 genCoordOk :: Gen Coordinates
 genCoordOk = do
-  x <- choose (-50, 50)
-  y <- choose (0, 100)
+  x <- choose (0, 100)
+  y <- choose (0, 50)
   return (Coord x y)
 
 genMovUOk :: Integer -> Gen Movement
@@ -80,7 +80,7 @@ coordQCT = do
     it "prop_inv_zone KO" $ property $
       forAll genZoneKo $ \z -> not (prop_inv_zone z)
     it "prop_inv_zone_coord" $ property $
-      forAll genCoordOk $ prop_inv_zone_coord (Zone 50 100)
+      forAll genCoordOk $ prop_inv_zone_coord (Zone 100 50)
     it "prop_inv_movement Up" $ property $
       forAll (genMovUOk 100) $ prop_inv_movement
     it "prop_inv_movement Down" $ property $
@@ -95,21 +95,21 @@ coordQCT = do
       \x y i -> prop_move_upDown (Coord x y) i
   describe "Coord - QuickCheck moveSafe" $ do
     it "prop_moveSafe Up" $ property $
-      forAll (genMovUOk 100) $ \z -> prop_moveSafe (Zone 50 100) (Coord 0 0) z
+      forAll (genMovUOk 100) $ \z -> prop_moveSafe (Zone 100 100) (Coord 0 0) z
     it "prop_moveSafe Down" $ property $
-      forAll (genMovDOk 100) $ \z -> prop_moveSafe (Zone 50 100) (Coord 0 100) z
+      forAll (genMovDOk 100) $ \z -> prop_moveSafe (Zone 100 100) (Coord 0 100) z
     it "prop_moveSafe Right" $ property $
-      forAll (genMovROk 100) $ \z -> prop_moveSafe (Zone 50 100) (Coord (-50) 0) z
+      forAll (genMovROk 100) $ \z -> prop_moveSafe (Zone 100 100) (Coord 0 0) z
     it "prop_moveSafe Left" $ property $
-      forAll (genMovLOk 100) $ \z -> prop_moveSafe (Zone 50 100) (Coord 50 0) z
+      forAll (genMovLOk 100) $ \z -> prop_moveSafe (Zone 100 100) (Coord 100 0) z
     it "prop_moveSafe_in_zone Up" $ property $
-      forAll (genMovUOk 1000) $ \z -> prop_moveSafe_in_zone (Zone 10 20) (Coord 0 0) z
+      forAll (genMovUOk 1000) $ \z -> prop_moveSafe_in_zone (Zone 100 100) (Coord 100 100) z
     it "prop_moveSafe_in_zone Down" $ property $
-      forAll (genMovDOk 1000) $ \z -> prop_moveSafe_in_zone (Zone 10 20) (Coord 0 0) z
+      forAll (genMovDOk 1000) $ \z -> prop_moveSafe_in_zone (Zone 100 100) (Coord 100 100) z
     it "prop_moveSafe_in_zone Right" $ property $
-      forAll (genMovROk 1000) $ \z -> prop_moveSafe_in_zone (Zone 10 20) (Coord 0 0) z
+      forAll (genMovROk 1000) $ \z -> prop_moveSafe_in_zone (Zone 100 100) (Coord 100 100) z
     it "prop_moveSafe_in_zone Left" $ property $
-      forAll (genMovLOk 1000) $ \z -> prop_moveSafe_in_zone (Zone 10 20) (Coord 0 0) z
+      forAll (genMovLOk 1000) $ \z -> prop_moveSafe_in_zone (Zone 100 100) (Coord 100 100) z
 
 -- ToDo
 -- KO tests

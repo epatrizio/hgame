@@ -1,6 +1,6 @@
 module Coord where -- ( someFunc )
 
-data Zone = Zone Integer Integer    -- Width (-w +w) and Height (0 +h)
+data Zone = Zone Integer Integer    -- Width (0 +w) and Height (0 +h)
     deriving (Show, Eq)
 
 data Coordinates = Coord Integer Integer
@@ -16,9 +16,14 @@ data Movement = Mov Direction Integer
 prop_inv_zone :: Zone -> Bool
 prop_inv_zone (Zone w h) = w>0 && h>0
 
+createZone :: Integer -> Integer -> Zone
+createZone w h = case prop_inv_zone (Zone w h) of
+    True -> (Zone w h)
+    False -> (Zone 640 480)     -- Default size if error
+
 -- Coordinates must be inside Zone
 prop_inv_zone_coord :: Zone -> Coordinates -> Bool
-prop_inv_zone_coord (Zone w h) (Coord x y) = x>=(-w) && x<=w && y>=0 && y<=h
+prop_inv_zone_coord (Zone w h) (Coord x y) = x>=0 && x<=w && y>=0 && y<=h
 
 -- Int nb mvt > 0
 prop_inv_movement :: Movement -> Bool
@@ -37,7 +42,6 @@ prop_move_upDown :: Coordinates -> Integer -> Bool
 prop_move_upDown (Coord x y) i = move (move (Coord x y) (Mov U i)) (Mov D i) == (Coord x y)
 
 -- moveSafe :: Coordinates -> Movement -> Zone -> Maybe Coordinates
--- Q: au lieu de ne pas bouger, aller au bout et s'arrêter ?
 moveSafe :: Zone -> Coordinates -> Movement -> Coordinates
 moveSafe (Zone _ h) (Coord x y) (Mov U u)
     | y+u <= h = move (Coord x y) (Mov U u)
@@ -49,7 +53,7 @@ moveSafe (Zone w _) (Coord x y) (Mov R r)
     | x+r <= w = move (Coord x y) (Mov R r)
     | otherwise = Coord x y
 moveSafe (Zone w _) (Coord x y) (Mov L l)
-    | x-l >= (-w) = move (Coord x y) (Mov L l)
+    | x-l >= 0 = move (Coord x y) (Mov L l)
     | otherwise = Coord x y
 
 -- check that movement does not go outside zone
@@ -57,7 +61,7 @@ prop_moveSafe :: Zone -> Coordinates -> Movement -> Bool
 prop_moveSafe (Zone _ h) (Coord x y) (Mov U u) = y+u <= h
 prop_moveSafe _ (Coord x y) (Mov D d) = y-d >= 0
 prop_moveSafe (Zone w _) (Coord x y) (Mov R r) = x+r <= w
-prop_moveSafe (Zone w _) (Coord x y) (Mov L l) = x-l >= (-w)
+prop_moveSafe (Zone w _) (Coord x y) (Mov L l) = x-l >= 0
 
 -- check that always remains in zone
 prop_moveSafe_in_zone :: Zone -> Coordinates -> Movement -> Bool
