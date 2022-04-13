@@ -42,10 +42,10 @@ loadBackground rdr path tmap smap = do
   let smap' = SM.addSprite (SpriteId "background") sprite smap
   return (tmap', smap')
 
-loadFighter :: String -> Renderer -> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
-loadFighter sid rdr path tmap smap = do
+loadFighter :: String -> Integer -> Integer -> Renderer -> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
+loadFighter sid imgW imgH rdr path tmap smap = do
   tmap' <- TM.loadTexture rdr path (TextureId sid) tmap
-  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId sid) (S.mkArea 0 0 100 100)
+  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId sid) (S.mkArea 0 0 (fromIntegral imgW) (fromIntegral imgH))
   let smap' = SM.addSprite (SpriteId sid) sprite smap
   return (tmap', smap')
 
@@ -55,6 +55,10 @@ fighterAssetId 1 G.Kick = "fighter1K"
 fighterAssetId 2 G.None = "fighter2"
 fighterAssetId _ _ = "fighter2K"
 
+fighter2AssetPosX :: G.FighterAction -> Integer
+fighter2AssetPosX G.None = 0
+fighter2AssetPosX G.Kick = 22   -- (= 97-75)
+
 main :: IO ()
 main = do
   initializeAll
@@ -62,10 +66,10 @@ main = do
   renderer <- createRenderer window (-1) defaultRenderer
   -- load assets
   (tmap, smap) <- loadBackground renderer "assets/background.bmp" TM.createTextureMap SM.createSpriteMap
-  (tmap1, smap1) <- loadFighter (fighterAssetId 1 G.None) renderer "assets/perso.bmp" tmap smap
-  (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) renderer "assets/virus.bmp" tmap1 smap1
-  (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) renderer "assets/perso.bmp" tmap1' smap1'
-  (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) renderer "assets/virus.bmp" tmap2 smap2
+  (tmap1, smap1) <- loadFighter (fighterAssetId 1 G.None) 75 120 renderer "assets/fighter1.bmp" tmap smap
+  (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 97 120 renderer "assets/fighter1K.bmp" tmap1 smap1
+  (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 75 120 renderer "assets/fighter2.bmp" tmap1' smap1'
+  (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 97 120 renderer "assets/fighter2K.bmp" tmap2 smap2
   -- init game
   let gameState = G.createGameState "Fighter 1" "Fighter 2"
   let kbd = K.createKeyboard
@@ -83,8 +87,8 @@ gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1)
   S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId (fighterAssetId 1 a1)) smap)
                                  (fromIntegral x1)
                                  (fromIntegral y1))
-  S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId (fighterAssetId 1 a2)) smap)
-                                (fromIntegral x2)
+  S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId (fighterAssetId 2 a2)) smap)
+                                (fromIntegral (x2 - (fighter2AssetPosX a2)))
                                 (fromIntegral y2))
   ---
   present renderer

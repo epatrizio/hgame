@@ -67,30 +67,33 @@ action fid a (GameIn (Fighter i1 n1 c1 h1 d1 a1 s1) (Fighter i2 n2 c2 h2 d2 a2 s
 gameStep :: RealFrac a => GameState -> Keyboard -> a -> GameState
 gameStep gstate kbd deltaTime =
   let modif =   (if K.keypressed KeycodeLeft kbd
-                then moveD 1 L else id)
-                .
-                (if K.keypressed KeycodeRight kbd
-                then moveD 1 R else id)
-                .
-                (if K.keypressed KeycodeUp kbd
-                then moveD 1 D else id)
-                .
-                (if K.keypressed KeycodeDown kbd
-                then moveD 1 U else id)
-                .
-                (if K.keypressed KeycodeN kbd
-                then action 1 Kick else action 1 None)
-                .
-                (if K.keypressed KeycodeQ kbd
                 then moveD 2 L else id)
                 .
-                (if K.keypressed KeycodeS kbd
+                (if K.keypressed KeycodeRight kbd
                 then moveD 2 R else id)
                 .
-                (if K.keypressed KeycodeZ kbd
+                (if K.keypressed KeycodeUp kbd
                 then moveD 2 D else id)
                 .
-                (if K.keypressed KeycodeW kbd
+                (if K.keypressed KeycodeDown kbd
                 then moveD 2 U else id)
+                .
+                (if K.keypressed KeycodeReturn kbd
+                then action 2 Kick else action 2 None)
+                .
+                (if K.keypressed KeycodeQ kbd
+                then moveD 1 L else id)
+                .
+                (if K.keypressed KeycodeS kbd
+                then moveD 1 R else id)
+                .
+                (if K.keypressed KeycodeZ kbd
+                then moveD 1 D else id)
+                .
+                (if K.keypressed KeycodeW kbd
+                then moveD 1 U else id)
+                .
+                (if K.keypressed KeycodeSpace kbd
+                then action 1 Kick else action 1 None)
 
   in modif gstate
