@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import System.Exit (exitSuccess)
+
 import Control.Monad (unless)
 import Control.Concurrent (threadDelay)
 
@@ -70,16 +72,25 @@ main = do
   (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 97 120 renderer "assets/fighter1K.bmp" tmap1 smap1
   (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 75 120 renderer "assets/fighter2.bmp" tmap1' smap1'
   (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 97 120 renderer "assets/fighter2K.bmp" tmap2 smap2
-  -- init game
+  -- init game (#ToDo : sizes, default positions in argument)
   let gameState = G.createGameState "Fighter 1" "Fighter 2"
   let kbd = K.createKeyboard
   gameLoop 60 renderer tmap2' smap2' kbd gameState
 
--- ToDo : GameOver > end loop
 gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> GameState -> IO ()
-gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 s1) (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 s2) z speed) = do
+gameLoop _ _ _ _ _ (G.GameOver fid) = do
+  putStrLn $ show (G.GameOver fid)
+  exitSuccess
+gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 s1) (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 s2) z speed print) = do
   startTime <- time
   events <- pollEvents
+  if (print) then do
+    putStrLn $ "Fight in progress"
+    putStrLn $ show (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 s1)
+    putStrLn $ show (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 s2)
+    putStrLn $ ""
+  else
+    pure ()
   let kbd' = K.handleEvents events kbd
   clear renderer
   --- display
@@ -98,7 +109,6 @@ gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1)
   threadDelay $ delayTime * 1000 -- microseconds
   endTime <- time
   let deltaTime = endTime - startTime
-  --- update du game state
-  let gameState' = G.gameStep (G.GameIn (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 s1) (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 s2) z speed) kbd' deltaTime
-  ---
+  --- update gameState
+  let gameState' = G.gameStep (G.GameIn (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 s1) (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 s2) z speed False) kbd' deltaTime
   unless (K.keypressed KeycodeEscape kbd') (gameLoop frameRate renderer tmap smap kbd' gameState')

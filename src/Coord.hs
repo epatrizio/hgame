@@ -4,13 +4,16 @@ data Zone = Zone Integer Integer    -- Width (0 +w) and Height (0 +h)
     deriving (Show, Eq)
 
 data Coordinates = Coord Integer Integer
-    deriving (Show, Eq)
+    deriving (Eq)
 
 data Direction = U | D | R | L      -- U (Up) | D (Down) | R (Right) | L (Left)
     deriving (Show, Eq)
 
 data Movement = Mov Direction Integer
     deriving (Show, Eq)
+
+instance Show Coordinates where
+    show (Coord x y) = "Coord x:" <> (show x) <> " y:" <> (show y)
 
 -- Width & Height > 0
 prop_inv_zone :: Zone -> Bool

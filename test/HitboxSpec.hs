@@ -20,5 +20,3 @@ hitboxUT = do
       prop_inv_hb_notEmpty (Rect (Coord 0 10) 5 5) `shouldBe` True
     it "prop_inv_hb_notEmpty - OK not empty sequence" $
       prop_inv_hb_notEmpty (Composite (S.fromList [(Rect (Coord 0 10) 5 5)])) `shouldBe` True
-
-

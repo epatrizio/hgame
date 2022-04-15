@@ -9,11 +9,29 @@ data Hitbox =
     Rect Coordinates Integer Integer    -- Rectangle Coord (point on the top left) + w / h
     | Composite (Seq Hitbox)
 
+instance Show Hitbox where
+    show (Rect c w h) = "Top left:" <> (show c) <> " rect dim = w:" <> (show w) <> " h:" <> (show h) <> " Bottom right:"
+    show (Composite shb) = "HB1 (Normal): " <> (show (S.index shb 0)) <> " - (Kick): " <> (show (S.index shb 1))
+
 prop_inv_hb_notEmpty :: Hitbox -> Bool
 prop_inv_hb_notEmpty (Rect _ w h) = w>0 && h>0
 prop_inv_hb_notEmpty (Composite s) = case s of
     Empty -> False
     _ -> True
 
-createHitbox :: Integer -> Integer -> Integer -> Integer -> Hitbox
-createHitbox x y w h = Rect (Coord x y) w h
+rectIntersect :: Hitbox -> Hitbox -> Bool
+rectIntersect (Rect (Coord x1 y1) w1 h1) (Rect (Coord x2 y2) w2 h2) = not ( x1+w1<x2 || x2+w2<x1 || y1+h1<y2 || y2+h2<y1 )
+rectIntersect _ _ = False
+
+createHitbox :: Integer -> Integer -> Integer -> Hitbox
+createHitbox 1 x y = Composite (S.fromList [(Rect (Coord x y) 75 120), (Rect (Coord x y) 97 120)])
+createHitbox 2 x y = Composite (S.fromList [(Rect (Coord x y) 75 120), (Rect (Coord (x-22) y) 97 120)])
+
+moveHitbox :: Integer -> Coordinates -> Hitbox
+moveHitbox fid (Coord x y) = createHitbox fid x y
+
+touchHitbox :: Hitbox -> Hitbox -> Bool
+touchHitbox (Composite shb1) (Composite shb2) =
+    let (Rect r1topLeft w1 h1) = S.index shb1 1 in
+    let (Rect r2topLeft w2 h2) = S.index shb2 0 in
+        rectIntersect (Rect r1topLeft w1 h1) (Rect r2topLeft w2 h2)
