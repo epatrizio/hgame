@@ -49,7 +49,20 @@ instance Show GameState where
     show (GameOver fid) = "GameOver! And the winner is the fighter " <> (show fid) <> " :)"
     show (GameIn f1 f2 _ _ _) = "Fight in progress >> fighter 1: " <> (show f1) <> " fighter 2: " <> (show f2)
 
--- #ToDo invariant gameIn -> FighterState OK
+prop_inv_fighterState :: FighterState -> Bool
+prop_inv_fighterState KO = True
+prop_inv_fighterState (OK life) = life > 0
+
+prop_inv_gameState :: GameState -> Bool
+prop_inv_gameState (GameOver _) = True
+prop_inv_gameState GameIn { fighter1 = Fighter { stateF=KO }} = False
+prop_inv_gameState GameIn { fighter2 = Fighter { stateF=KO }} = False
+prop_inv_gameState GameIn {
+    fighter1 = Fighter { posF=c1, stateF=s1 },
+    fighter2 = Fighter { posF=c2, stateF=s2 },
+    gameZone = z} =
+        prop_inv_fighterState s1 && prop_inv_fighterState s2 &&
+        prop_inv_zone_coord z c1 && prop_inv_zone_coord z c2
 
 createFighter :: Integer -> String -> Integer -> Integer -> Hitbox -> Direction -> Fighter
 createFighter id name x y h d = Fighter (FighterId id) name (Coord x y) h d None (OK 100)

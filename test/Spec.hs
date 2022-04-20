@@ -2,7 +2,7 @@ import Test.Hspec
 
 import CoordSpec as C
 import HitboxSpec as H
--- import GameSpec as G
+import GameSpec as G
 
 main :: IO ()
 main = hspec $ do
@@ -11,3 +11,6 @@ main = hspec $ do
   C.coordQCT
   -- Hitbox
   H.hitboxUT
+  H.hitboxQCT
+  -- Game
+  G.gameQCT
