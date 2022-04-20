@@ -87,8 +87,8 @@ moveD 2 dir (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2) z s _) =
 
 action :: Integer -> FighterAction -> GameState -> GameState
 action _ _ (GameOver fid) = GameOver fid
-action 1 None (GameIn (Fighter i1 n1 c1 h1 d1 a1 s1) f2 z s _) = GameIn (Fighter i1 n1 c1 h1 d1 None s1) f2 z s False
-action 2 None (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2) z s _) = GameIn f1 (Fighter i2 n2 c2 h2 d2 None s2) z s False
+action 1 None (GameIn (Fighter i1 n1 c1 h1 d1 a1 s1) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 None s1) f2 z s p
+action 2 None (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 None s2) z s p
 action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 a1 s1) (Fighter i2 n2 c2 h2 d2 a2 (OK life)) z s _) =
     case touchHitbox h1 h2 of
         True
