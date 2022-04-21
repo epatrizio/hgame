@@ -23,6 +23,13 @@ prop_inv_hitbox :: Hitbox -> Bool
 prop_inv_hitbox (Rect _ _ _) = False
 prop_inv_hitbox (Composite s) = (S.length s)==2 && foldr (\rect res -> res && (prop_inv_hb rect)) True s
 
+-- Hitbox must be inside Zone
+prop_inv_zone_hitbox :: Zone -> Hitbox -> Bool
+prop_inv_zone_hitbox (Zone w h) (Rect (Coord x y) rw rh) =
+    prop_inv_zone_coord (Zone w h) (Coord x y) && prop_inv_zone_coord (Zone w h) (Coord (x+rw) (y+rh))
+prop_inv_zone_hitbox (Zone w h) (Composite s) =
+    foldr (\rect res -> res && (prop_inv_zone_hitbox (Zone w h) rect)) True s
+
 -- Warning : sizes are hardcoded
 createHitbox :: Integer -> Integer -> Integer -> Hitbox
 createHitbox 1 x y = Composite (S.fromList [(Rect (Coord x y) 80 160), (Rect (Coord x y) 110 160)])

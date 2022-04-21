@@ -76,14 +76,20 @@ createGameState name1 name2 =
         5
         True
 
--- #ToDo moveSafe : check hitbox size
-
 moveD :: Integer -> Direction -> GameState -> GameState
 moveD _ _ (GameOver fid) = GameOver fid
 moveD 1 dir (GameIn (Fighter i1 n1 c1 h1 d1 a1 s1) f2 z s _) =
-    let c = moveSafe z c1 (Mov dir 1) in GameIn (Fighter i1 n1 c (moveHitbox 1 c) d1 a1 s1) f2 z s False
+    let c = moveSafe z c1 (Mov dir 1) in
+    let hb = moveHitbox 1 c in
+        case prop_inv_zone_hitbox z hb of
+            True -> GameIn (Fighter i1 n1 c hb d1 a1 s1) f2 z s False
+            False -> GameIn (Fighter i1 n1 c1 h1 d1 a1 s1) f2 z s False
 moveD 2 dir (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2) z s _) =
-    let c = moveSafe z c2 (Mov dir 1) in GameIn f1 (Fighter i2 n2 c (moveHitbox 2 c) d2 a2 s2) z s False
+    let c = moveSafe z c2 (Mov dir 1) in
+    let hb = moveHitbox 2 c in
+        case prop_inv_zone_hitbox z hb of
+            True -> GameIn f1 (Fighter i2 n2 c hb d2 a2 s2) z s False
+            False -> GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2) z s False
 
 action :: Integer -> FighterAction -> GameState -> GameState
 action _ _ (GameOver fid) = GameOver fid

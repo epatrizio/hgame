@@ -29,6 +29,19 @@ genRect x1 y1 w1 h1 = do
   h <- choose (1, 100)
   return (Rect (Coord x y) w h)
 
+genRectInZone :: Zone -> Gen Hitbox
+genRectInZone (Zone zw zh) = do
+  x <- choose (0, zw-1)
+  y <- choose (0, zh-1)
+  w <- choose (1, zw-x)
+  h <- choose (1, zh-y)
+  return (Rect (Coord x y) w h)
+
+genHitboxInZone :: Zone -> Gen Hitbox
+genHitboxInZone z = do
+  l_rect <- listOf (genRectInZone z)
+  return (Composite (S.fromList l_rect))
+
 -- Unit tests
 hitboxUT = do
   describe "Hitbox - Unit tests" $ do
@@ -51,10 +64,12 @@ hitboxUT = do
     it "touchHitbox - f1 f22" $
       touchHitbox hb_f22 hb_f1 `shouldBe` True
 
--- Tester le cerateHB
-
 hitboxQCT = do
   describe "Hitbox - QuickCheck tests" $ do
+    it "prop_inv_zone_hitbox Rect" $
+      forAll (genRectInZone (Zone 100 200)) $ \rect -> prop_inv_zone_hitbox (Zone 100 200) rect
+    it "prop_inv_zone_hitbox Composite" $
+      forAll (genHitboxInZone (Zone 100 200)) $ \comp -> prop_inv_zone_hitbox (Zone 100 200) comp
     it "createHitbox 1" $
       forAll (genIntPositive 0) $ \x -> forAll (genIntPositive 0) $ \y -> prop_inv_hitbox (createHitbox 1 x y)
     it "createHitbox 2" $   -- 30 Hardcoded :(

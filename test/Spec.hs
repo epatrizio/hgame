@@ -13,4 +13,5 @@ main = hspec $ do
   H.hitboxUT
   H.hitboxQCT
   -- Game
+  G.gameUT
   G.gameQCT
