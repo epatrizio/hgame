@@ -16,7 +16,7 @@ hb_f1 :: Hitbox
 hb_f1 = createHitbox 1 0 0
 
 hb_f21 :: Hitbox
-hb_f21 = createHitbox 2 100 100
+hb_f21 = createHitbox 2 120 120
 
 hb_f22 :: Hitbox
 hb_f22 = createHitbox 2 10 10
@@ -57,8 +57,8 @@ hitboxQCT = do
   describe "Hitbox - QuickCheck tests" $ do
     it "createHitbox 1" $
       forAll (genIntPositive 0) $ \x -> forAll (genIntPositive 0) $ \y -> prop_inv_hitbox (createHitbox 1 x y)
-    it "createHitbox 2" $   -- 22 Hardcoded :(
-      forAll (genIntPositive 22) $ \x -> forAll (genIntPositive 0) $ \y -> prop_inv_hitbox (createHitbox 2 x y)
+    it "createHitbox 2" $   -- 30 Hardcoded :(
+      forAll (genIntPositive 30) $ \x -> forAll (genIntPositive 0) $ \y -> prop_inv_hitbox (createHitbox 2 x y)
     it "rectIntersect 1" $
       forAll (genRect 0 0 100 100) $ \(Rect (Coord x1 y1) w1 h1) ->
         forAll (genRect x1 y1 w1 h1) $ \r2 ->

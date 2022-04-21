@@ -40,7 +40,7 @@ import qualified Game as G
 loadBackground :: Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
 loadBackground rdr path tmap smap = do
   tmap' <- TM.loadTexture rdr path (TextureId "background") tmap
-  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId "background") (S.mkArea 0 0 640 480)
+  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId "background") (S.mkArea 0 0 1024 531)
   let smap' = SM.addSprite (SpriteId "background") sprite smap
   return (tmap', smap')
 
@@ -59,19 +59,19 @@ fighterAssetId _ _ = "fighter2K"
 
 fighter2AssetPosX :: G.FighterAction -> Integer
 fighter2AssetPosX G.None = 0
-fighter2AssetPosX G.Kick = 22   -- (= 97-75)
+fighter2AssetPosX G.Kick = 30   -- (= 110-80)
 
 main :: IO ()
 main = do
   initializeAll
-  window <- createWindow "PAF Project - Street Fighter 2" $ defaultWindow { windowInitialSize = V2 640 480 }
+  window <- createWindow "PAF Project - Street Fighter 2" $ defaultWindow { windowInitialSize = V2 1024 531 }
   renderer <- createRenderer window (-1) defaultRenderer
   -- load assets
   (tmap, smap) <- loadBackground renderer "assets/background.bmp" TM.createTextureMap SM.createSpriteMap
-  (tmap1, smap1) <- loadFighter (fighterAssetId 1 G.None) 75 120 renderer "assets/fighter1.bmp" tmap smap
-  (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 97 120 renderer "assets/fighter1K.bmp" tmap1 smap1
-  (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 75 120 renderer "assets/fighter2.bmp" tmap1' smap1'
-  (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 97 120 renderer "assets/fighter2K.bmp" tmap2 smap2
+  (tmap1, smap1) <- loadFighter (fighterAssetId 1 G.None) 80 160 renderer "assets/fighter1.bmp" tmap smap
+  (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 110 160 renderer "assets/fighter1K.bmp" tmap1 smap1
+  (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 80 160 renderer "assets/fighter2.bmp" tmap1' smap1'
+  (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 110 160 renderer "assets/fighter2K.bmp" tmap2 smap2
   -- init game (#ToDo : sizes, default positions in argument)
   let gameState = G.createGameState "Fighter 1" "Fighter 2"
   let kbd = K.createKeyboard
@@ -85,7 +85,7 @@ gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1)
   startTime <- time
   events <- pollEvents
   if (print) then do
-    putStrLn $ "Fight in progress"
+    putStrLn $ "\ESC[0mFight in progress"
     putStrLn $ (if l1 < l2 then "\ESC[31m" else "\ESC[0m") <> show (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1))
     putStrLn $ (if l2 < l1 then "\ESC[31m" else "\ESC[0m") <> show (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2))
     putStrLn $ ""

@@ -25,8 +25,8 @@ prop_inv_hitbox (Composite s) = (S.length s)==2 && foldr (\rect res -> res && (p
 
 -- Warning : sizes are hardcoded
 createHitbox :: Integer -> Integer -> Integer -> Hitbox
-createHitbox 1 x y = Composite (S.fromList [(Rect (Coord x y) 75 120), (Rect (Coord x y) 97 120)])
-createHitbox 2 x y = Composite (S.fromList [(Rect (Coord x y) 75 120), (Rect (Coord (x-22) y) 97 120)])
+createHitbox 1 x y = Composite (S.fromList [(Rect (Coord x y) 80 160), (Rect (Coord x y) 110 160)])
+createHitbox 2 x y = Composite (S.fromList [(Rect (Coord x y) 80 160), (Rect (Coord (x-30) y) 110 160)])
 
 moveHitbox :: Integer -> Coordinates -> Hitbox
 moveHitbox fid (Coord x y) = createHitbox fid x y

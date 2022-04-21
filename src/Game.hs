@@ -70,9 +70,9 @@ createFighter id name x y h d = Fighter (FighterId id) name (Coord x y) h d None
 createGameState :: String -> String -> GameState
 createGameState name1 name2 =
     GameIn
-        (createFighter 1 name1 200 250 (createHitbox 1 200 250) R)
-        (createFighter 2 name2 400 250 (createHitbox 2 400 250) L)
-        (createZone 0 0)    -- default size
+        (createFighter 1 name1 300 350 (createHitbox 1 300 350) R)
+        (createFighter 2 name2 500 350 (createHitbox 2 500 350) L)
+        (createZone 1024 531)    -- default size
         5
         True
 
