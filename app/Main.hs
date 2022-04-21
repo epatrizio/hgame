@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import System.IO (hFlush, stdout)
+
 import System.Exit (exitSuccess)
 
 import Control.Monad (unless)
@@ -37,6 +39,8 @@ import qualified Coord as C
 import Game (GameState, Fighter (..))
 import qualified Game as G
 
+import Utils
+
 loadBackground :: Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
 loadBackground rdr path tmap smap = do
   tmap' <- TM.loadTexture rdr path (TextureId "background") tmap
@@ -61,9 +65,23 @@ fighter2AssetPosX :: G.FighterAction -> Integer
 fighter2AssetPosX G.None = 0
 fighter2AssetPosX G.Kick = 30   -- (= 110-80)
 
+askName :: String -> String -> (String -> String -> Valid String) -> IO String
+askName part defaultStr validateStr = do
+  putStr $ part ++ " : "
+  hFlush stdout
+  str <- getLine
+  case (validateStr str defaultStr) of
+    Validation (Left (error,dStr)) -> do
+      putStrLn $ error
+      return dStr
+    Validation (Right name) ->
+      return name
+
 main :: IO ()
 main = do
   initializeAll
+  name1 <- askName "Fighter 1 name" "Fighter 1" validateString
+  name2 <- askName "Fighter 2 name" "Fighter 2" validateString
   window <- createWindow "PAF Project - Street Fighter 2" $ defaultWindow { windowInitialSize = V2 1024 531 }
   renderer <- createRenderer window (-1) defaultRenderer
   -- load assets
@@ -73,7 +91,7 @@ main = do
   (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 80 160 renderer "assets/fighter2.bmp" tmap1' smap1'
   (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 110 160 renderer "assets/fighter2K.bmp" tmap2 smap2
   -- init game (#ToDo : sizes, default positions in argument)
-  let gameState = G.createGameState "Fighter 1" "Fighter 2"
+  let gameState = G.createGameState name1 name2
   let kbd = K.createKeyboard
   gameLoop 60 renderer tmap2' smap2' kbd gameState
 
