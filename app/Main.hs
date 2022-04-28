@@ -5,6 +5,7 @@ import System.IO (hFlush, stdout)
 
 import System.Exit (exitSuccess)
 
+import Control.Monad.Reader
 import Control.Monad (unless)
 import Control.Concurrent (threadDelay)
 
@@ -39,12 +40,18 @@ import qualified Coord as C
 import Game (GameState, Fighter (..))
 import qualified Game as G
 
+import Config (Configuration)
+import qualified Config as Co
+
 import Utils
 
-loadBackground :: Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
-loadBackground rdr path tmap smap = do
+loadConfig :: IO Configuration
+loadConfig = return (Co.Config { Co.screenW = 1024, Co.screenH = 531})
+
+loadBackground :: Integer -> Integer -> Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
+loadBackground sw sh rdr path tmap smap = do
   tmap' <- TM.loadTexture rdr path (TextureId "background") tmap
-  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId "background") (S.mkArea 0 0 1024 531)
+  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId "background") (S.mkArea 0 0 (fromIntegral sw) (fromIntegral sh))
   let smap' = SM.addSprite (SpriteId "background") sprite smap
   return (tmap', smap')
 
@@ -80,18 +87,21 @@ askName part defaultStr validateStr = do
 main :: IO ()
 main = do
   initializeAll
+  conf <- loadConfig
+  let sw = runReader (Co.getConf Co.screenW) conf
+  let sh = runReader (Co.getConf Co.screenH) conf
   name1 <- askName "Fighter 1 name" "Fighter 1" validateString
   name2 <- askName "Fighter 2 name" "Fighter 2" validateString
-  window <- createWindow "PAF Project - Street Fighter 2" $ defaultWindow { windowInitialSize = V2 1024 531 }
+  window <- createWindow "PAF Project - Street Fighter 2" $ defaultWindow { windowInitialSize = V2 (fromIntegral sw) (fromIntegral sh) }
   renderer <- createRenderer window (-1) defaultRenderer
   -- load assets
-  (tmap, smap) <- loadBackground renderer "assets/background.bmp" TM.createTextureMap SM.createSpriteMap
+  (tmap, smap) <- loadBackground sw sh renderer "assets/background.bmp" TM.createTextureMap SM.createSpriteMap
   (tmap1, smap1) <- loadFighter (fighterAssetId 1 G.None) 80 160 renderer "assets/fighter1.bmp" tmap smap
   (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 110 160 renderer "assets/fighter1K.bmp" tmap1 smap1
   (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 80 160 renderer "assets/fighter2.bmp" tmap1' smap1'
   (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 110 160 renderer "assets/fighter2K.bmp" tmap2 smap2
   -- init game (#ToDo : sizes, default positions in argument)
-  let gameState = G.createGameState name1 name2
+  let gameState = G.createGameState sw sh name1 name2
   let kbd = K.createKeyboard
   gameLoop 60 renderer tmap2' smap2' kbd gameState
 

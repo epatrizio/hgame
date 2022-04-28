@@ -67,12 +67,12 @@ prop_inv_gameState GameIn {
 createFighter :: Integer -> String -> Integer -> Integer -> Hitbox -> Direction -> Fighter
 createFighter id name x y h d = Fighter (FighterId id) name (Coord x y) h d None (OK 10)
 
-createGameState :: String -> String -> GameState
-createGameState name1 name2 =
+createGameState :: Integer -> Integer -> String -> String -> GameState
+createGameState sw sh name1 name2 =
     GameIn
         (createFighter 1 name1 300 350 (createHitbox 1 300 350) R)
         (createFighter 2 name2 500 350 (createHitbox 2 500 350) L)
-        (createZone 1024 531)    -- default size
+        (createZone sw sh)
         5
         True
 
