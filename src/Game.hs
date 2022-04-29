@@ -84,39 +84,39 @@ createGameState sw sh name1 name2 =
 
 moveD :: Integer -> Direction -> GameState -> GameState
 moveD _ _ (GameOver fid) = GameOver fid
-moveD 1 dir (GameIn (Fighter i1 n1 c1 h1 d1 a1 s1 t1) f2 z s p) =
+moveD 1 dir (GameIn f1@(Fighter i1 n1 c1 h1 d1 a1 s1 t1) f2 z s p) =
     let c = moveSafe z c1 (Mov dir 1) in
     let hb = moveHitbox 1 c in
         case prop_inv_zone_hitbox z hb of
             True -> GameIn (Fighter i1 n1 c hb d1 a1 s1 t1) f2 z s p
-            False -> GameIn (Fighter i1 n1 c1 h1 d1 a1 s1 t1) f2 z s p
-moveD 2 dir (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2 t2) z s p) =
+            False -> GameIn f1 f2 z s p
+moveD 2 dir (GameIn f1 f2@(Fighter i2 n2 c2 h2 d2 a2 s2 t2) z s p) =
     let c = moveSafe z c2 (Mov dir 1) in
     let hb = moveHitbox 2 c in
         case prop_inv_zone_hitbox z hb of
             True -> GameIn f1 (Fighter i2 n2 c hb d2 a2 s2 t2) z s p
-            False -> GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 s2 t2) z s p
+            False -> GameIn f1 f2 z s p
 
 action :: Integer -> FighterAction -> GameState -> GameState
 action _ _ (GameOver fid) = GameOver fid
 action 1 None (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 None s1 False) f2 z s p
 action 2 None (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 None s2 False) z s p
-action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 t1) (Fighter i2 n2 c2 h2 d2 a2 (OK life) t2) z s _) =
+action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 t1) f2@(Fighter i2 n2 c2 h2 d2 a2 (OK life) t2) z s _) =
     case touchHitbox h1 h2 of
         True
             | life <= 1 -> GameOver (FighterId 1)
             | otherwise -> case t1 of
                 False -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 True) (Fighter i2 n2 c2 h2 d2 a2 (OK (life-1)) t2) z s True
-                otherwise -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 True) (Fighter i2 n2 c2 h2 d2 a2 (OK (life)) t2) z s False
-        False -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 False) (Fighter i2 n2 c2 h2 d2 a2 (OK life) t2) z s False
-action 2 Kick (GameIn (Fighter i1 n1 c1 h1 d1 a1 (OK life) t1) (Fighter i2 n2 c2 h2 d2 _ s2 t2) z s _) =
+                otherwise -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 True) f2 z s False
+        False -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 False) f2 z s False
+action 2 Kick (GameIn f1@(Fighter i1 n1 c1 h1 d1 a1 (OK life) t1) (Fighter i2 n2 c2 h2 d2 _ s2 t2) z s _) =
     case touchHitbox h2 h1 of
         True
             | life <= 1 -> GameOver (FighterId 2)
             | otherwise -> case t2 of
                 False -> GameIn (Fighter i1 n1 c1 h1 d1 a1 (OK (life-1)) t1) (Fighter i2 n2 c2 h2 d2 Kick s2 True) z s True
-                otherwise -> GameIn (Fighter i1 n1 c1 h1 d1 a1 (OK (life)) t1) (Fighter i2 n2 c2 h2 d2 Kick s2 True) z s False
-        False -> GameIn (Fighter i1 n1 c1 h1 d1 a1 (OK life) t1) (Fighter i2 n2 c2 h2 d2 Kick s2 False) z s False
+                otherwise -> GameIn f1 (Fighter i2 n2 c2 h2 d2 Kick s2 True) z s False
+        False -> GameIn f1 (Fighter i2 n2 c2 h2 d2 Kick s2 False) z s False
 
 gameStep :: RealFrac a => GameState -> Keyboard -> a -> GameState
 gameStep (GameOver fid) _ _ = GameOver fid

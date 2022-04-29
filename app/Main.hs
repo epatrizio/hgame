@@ -109,13 +109,13 @@ gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> 
 gameLoop _ _ _ _ _ (G.GameOver fid) = do
   putStrLn $ "\ESC[32m" <> show (G.GameOver fid)
   exitSuccess
-gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1) (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2) z speed print) = do
+gameLoop frameRate renderer tmap smap kbd (G.GameIn f1@(Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1) f2@(Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2) z speed print) = do
   startTime <- time
   events <- pollEvents
   if (print) then do
     putStrLn $ "\ESC[0mFight in progress"
-    putStrLn $ (if l1 < l2 then "\ESC[31m" else "\ESC[0m") <> show (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1)
-    putStrLn $ (if l2 < l1 then "\ESC[31m" else "\ESC[0m") <> show (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2)
+    putStrLn $ (if l1 < l2 then "\ESC[31m" else "\ESC[0m") <> show f1
+    putStrLn $ (if l2 < l1 then "\ESC[31m" else "\ESC[0m") <> show f2
     putStrLn $ ""
   else
     pure ()
@@ -138,5 +138,5 @@ gameLoop frameRate renderer tmap smap kbd (G.GameIn (Fighter i1 n1 (Coord x1 y1)
   endTime <- time
   let deltaTime = endTime - startTime
   --- update gameState
-  let gameState' = G.gameStep (G.GameIn (Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1) (Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2) z speed False) kbd' deltaTime
+  let gameState' = G.gameStep (G.GameIn f1 f2 z speed False) kbd' deltaTime
   unless (K.keypressed KeycodeEscape kbd') (gameLoop frameRate renderer tmap smap kbd' gameState')
