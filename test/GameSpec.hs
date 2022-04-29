@@ -22,12 +22,12 @@ gameUT = do
         prop_inv_zone_hitbox z (hitboxF f2)
           `shouldBe` True
     it "Specific action KO" $
-      let GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 (OK l2)) z s i = createGameState 1024 531 "name1" "name2" in
-      let GameIn af1 (Fighter ai2 an2 ac2 ah2 ad2 aa2 (OK al2)) az as ai = action 1 Kick (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 (OK l2)) z s i) in
+      let GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 (OK l2) t2) z s i = createGameState 1024 531 "name1" "name2" in
+      let GameIn af1 (Fighter ai2 an2 ac2 ah2 ad2 aa2 (OK al2) t2) az as ai = action 1 Kick (GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 (OK l2) t2) z s i) in
         al2 `shouldBe` l2
     it "Specific action OK" $
-      let GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 (OK l2)) z s i = createGameState 1024 531 "name1" "name2" in
-      let GameIn af1 (Fighter ai2 an2 ac2 ah2 ad2 aa2 (OK al2)) az as ai = action 1 Kick (GameIn f1 (Fighter i2 n2 c2 (moveHitbox 2 (Coord 350 350)) d2 a2 (OK l2)) z s i) in
+      let GameIn f1 (Fighter i2 n2 c2 h2 d2 a2 (OK l2) t2) z s i = createGameState 1024 531 "name1" "name2" in
+      let GameIn af1 (Fighter ai2 an2 ac2 ah2 ad2 aa2 (OK al2) t2) az as ai = action 1 Kick (GameIn f1 (Fighter i2 n2 c2 (moveHitbox 2 (Coord 350 350)) d2 a2 (OK l2) t2) z s i) in
         al2 `shouldBe` (l2-1)
 
 -- QuickCheck auto tests
