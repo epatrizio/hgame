@@ -5,7 +5,10 @@ import System.IO (hFlush, stdout)
 
 import System.Exit (exitSuccess)
 
+import Data.Foldable (for_)
+
 import Control.Monad.Reader
+import Control.Monad.State
 import Control.Monad (unless)
 import Control.Concurrent (threadDelay)
 
@@ -100,18 +103,21 @@ main = do
   (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 110 160 renderer "assets/fighter1K.bmp" tmap1 smap1
   (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 80 160 renderer "assets/fighter2.bmp" tmap1' smap1'
   (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 110 160 renderer "assets/fighter2K.bmp" tmap2 smap2
-  -- init game (#ToDo : sizes, default positions in argument)
   let gameState = G.createGameState sw sh name1 name2
   let kbd = K.createKeyboard
-  gameLoop 60 renderer tmap2' smap2' kbd gameState
+  gameLoop 60 renderer tmap2' smap2' kbd [] gameState
 
-gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> GameState -> IO ()
-gameLoop _ _ _ _ _ (G.GameOver fid) = do
-  putStrLn $ "\ESC[32m" <> show (G.GameOver fid)
+gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> Log -> GameState -> IO ()
+gameLoop _ _ _ _ _ log (G.GameOver fid) = do
+  putStrLn $ "\ESC[0m" <> show (G.GameOver fid)
+  putStrLn $ ""
+  putStrLn $ "--- Game history ---"
+  for_ (fmap id (reverse log)) putStrLn
   exitSuccess
-gameLoop frameRate renderer tmap smap kbd (G.GameIn f1@(Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1) f2@(Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2) z speed print) = do
+gameLoop frameRate renderer tmap smap kbd log g@(G.GameIn f1@(Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1) f2@(Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2) z speed print) = do
   startTime <- time
   events <- pollEvents
+  let (_,log') =  if (print) then (runState (pushLog (show g)) log) else ((),log)
   if (print) then do
     putStrLn $ "\ESC[0mFight in progress"
     putStrLn $ (if l1 < l2 then "\ESC[31m" else "\ESC[0m") <> show f1
@@ -139,4 +145,4 @@ gameLoop frameRate renderer tmap smap kbd (G.GameIn f1@(Fighter i1 n1 (Coord x1 
   let deltaTime = endTime - startTime
   --- update gameState
   let gameState' = G.gameStep (G.GameIn f1 f2 z speed False) kbd' deltaTime
-  unless (K.keypressed KeycodeEscape kbd') (gameLoop frameRate renderer tmap smap kbd' gameState')
+  unless (K.keypressed KeycodeEscape kbd') (gameLoop frameRate renderer tmap smap kbd' log' gameState')

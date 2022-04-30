@@ -48,7 +48,11 @@ instance Show Fighter where
 
 instance Show GameState where
     show (GameOver fid) = "GameOver! And the winner is the fighter " <> (show fid) <> " :)"
-    show (GameIn f1 f2 _ _ _) = "Fight in progress >> fighter 1: " <> (show f1) <> " fighter 2: " <> (show f2)
+    show GameIn {
+        fighter1 = Fighter { nameF = n1, stateF = (OK l1) },
+        fighter2 = Fighter { nameF = n2, stateF = (OK l2) } } =
+            (if l1 < l2 then "\ESC[31m" else "\ESC[32m") <> show n1 <> "\ESC[0m (" <> show l1 <> ") - " <>
+            (if l2 < l1 then "\ESC[31m" else "\ESC[32m") <> show n2 <> "\ESC[0m (" <> show l2 <> ")"
 
 prop_inv_fighterState :: FighterState -> Bool
 prop_inv_fighterState KO = True
