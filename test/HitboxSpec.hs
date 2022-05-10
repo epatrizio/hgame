@@ -70,10 +70,10 @@ hitboxQCT = do
       forAll (genRectInZone (Zone 100 200)) $ \rect -> prop_inv_zone_hitbox (Zone 100 200) rect
     it "prop_inv_zone_hitbox Composite" $
       forAll (genHitboxInZone (Zone 100 200)) $ \comp -> prop_inv_zone_hitbox (Zone 100 200) comp
-    it "createHitbox 1" $
-      forAll (genIntPositive 0) $ \x -> forAll (genIntPositive 0) $ \y -> prop_inv_hitbox (createHitbox 1 x y)
+    it "createHitbox 1" $   -- 135 Hardcoded :(
+      forAll (genIntPositive 0) $ \x -> forAll (genIntPositive 135) $ \y -> prop_inv_hitbox (createHitbox 1 x y)
     it "createHitbox 2" $   -- 30 Hardcoded :(
-      forAll (genIntPositive 30) $ \x -> forAll (genIntPositive 0) $ \y -> prop_inv_hitbox (createHitbox 2 x y)
+      forAll (genIntPositive 30) $ \x -> forAll (genIntPositive 135) $ \y -> prop_inv_hitbox (createHitbox 2 x y)
     it "rectIntersect 1" $
       forAll (genRect 0 0 100 100) $ \(Rect (Coord x1 y1) w1 h1) ->
         forAll (genRect x1 y1 w1 h1) $ \r2 ->

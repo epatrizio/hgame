@@ -21,7 +21,7 @@ prop_inv_hb (Composite s) = case s of
 
 prop_inv_hitbox :: Hitbox -> Bool
 prop_inv_hitbox (Rect _ _ _) = False
-prop_inv_hitbox (Composite s) = (S.length s)==2 && foldr (\rect res -> res && (prop_inv_hb rect)) True s
+prop_inv_hitbox (Composite s) = (S.length s)==4 && foldr (\rect res -> res && (prop_inv_hb rect)) True s
 
 -- Hitbox must be inside Zone
 prop_inv_zone_hitbox :: Zone -> Hitbox -> Bool
@@ -32,8 +32,16 @@ prop_inv_zone_hitbox (Zone w h) (Composite s) =
 
 -- Warning : sizes are hardcoded
 createHitbox :: Integer -> Integer -> Integer -> Hitbox
-createHitbox 1 x y = Composite (S.fromList [(Rect (Coord x y) 80 160), (Rect (Coord x y) 110 160)])
-createHitbox 2 x y = Composite (S.fromList [(Rect (Coord x y) 80 160), (Rect (Coord (x-30) y) 110 160)])
+createHitbox 1 x y = Composite (S.fromList
+    [(Rect (Coord x y) 80 160),         -- None
+    (Rect (Coord x y) 110 160),         -- Kick
+    (Rect (Coord x (y-135)) 80 135),    -- Jump
+    (Rect (Coord x y) 80 160)])         -- Protect
+createHitbox 2 x y = Composite (S.fromList
+    [(Rect (Coord x y) 80 160),         -- None
+    (Rect (Coord (x-30) y) 110 160),    -- Kick
+    (Rect (Coord x (y-135)) 80 135),    -- Jump
+    (Rect (Coord x y) 80 160)])         -- Protect
 
 moveHitbox :: Integer -> Coordinates -> Hitbox
 moveHitbox fid (Coord x y) = createHitbox fid x y

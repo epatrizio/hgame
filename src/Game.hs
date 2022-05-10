@@ -10,7 +10,7 @@ import Hitbox
 
 data FighterState = KO | OK Integer    -- Integer > Life points
 
-data FighterAction = None | Kick
+data FighterAction = None | Kick | Jump | Protect
 
 newtype FighterId = FighterId Integer
     deriving (Eq,Ord)
@@ -105,6 +105,13 @@ action :: Integer -> FighterAction -> GameState -> GameState
 action _ _ (GameOver fid) = GameOver fid
 action 1 None (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 None s1 False) f2 z s p
 action 2 None (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 None s2 False) z s p
+
+action 1 Jump (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 Jump s1 False) f2 z s p
+action 2 Jump (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 Jump s2 False) z s p
+
+action 1 Protect (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 Protect s1 False) f2 z s p
+action 2 Protect (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 Protect s2 False) z s p
+
 action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 t1) f2@(Fighter i2 n2 c2 h2 d2 a2 (OK life) t2) z s _) =
     case t1 of
         True -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 True) f2 z s False
@@ -132,10 +139,10 @@ gameStep gstate kbd deltaTime =
                 then moveD 2 R else id)
                 .
                 (if K.keypressed KeycodeUp kbd
-                then moveD 2 D else id)
+                then action 2 Jump else id)
                 .
                 (if K.keypressed KeycodeDown kbd
-                then moveD 2 U else id)
+                then action 2 Protect else id)
                 .
                 (if K.keypressed KeycodeReturn kbd
                 then action 2 Kick else action 2 None)
@@ -147,12 +154,11 @@ gameStep gstate kbd deltaTime =
                 then moveD 1 R else id)
                 .
                 (if K.keypressed KeycodeZ kbd
-                then moveD 1 D else id)
+                then action 1 Jump else id)
                 .
                 (if K.keypressed KeycodeW kbd
-                then moveD 1 U else id)
+                then action 1 Protect else id)
                 .
                 (if K.keypressed KeycodeSpace kbd
                 then action 1 Kick else action 1 None)
-
   in modif gstate

@@ -68,12 +68,20 @@ loadFighter sid imgW imgH rdr path tmap smap = do
 fighterAssetId :: Integer -> G.FighterAction -> String
 fighterAssetId 1 G.None = "fighter1"
 fighterAssetId 1 G.Kick = "fighter1K"
+fighterAssetId 1 G.Jump = "fighter1J"
+fighterAssetId 1 G.Protect = "fighter1P"
 fighterAssetId 2 G.None = "fighter2"
-fighterAssetId _ _ = "fighter2K"
+fighterAssetId 2 G.Kick = "fighter2K"
+fighterAssetId 2 G.Jump = "fighter2J"
+fighterAssetId 2 G.Protect = "fighter2P"
 
 fighter2AssetPosX :: G.FighterAction -> Integer
-fighter2AssetPosX G.None = 0
 fighter2AssetPosX G.Kick = 30   -- (= 110-80)
+fighter2AssetPosX _ = 0
+
+fighterAssetPosY :: G.FighterAction -> Integer
+fighterAssetPosY G.Jump = 135   -- (Jump image height)
+fighterAssetPosY _ = 0
 
 askName :: String -> String -> (String -> String -> Valid String) -> IO String
 askName part defaultStr validateStr = do
@@ -101,11 +109,15 @@ main = do
   (tmap, smap) <- loadBackground sw sh renderer "assets/background.bmp" TM.createTextureMap SM.createSpriteMap
   (tmap1, smap1) <- loadFighter (fighterAssetId 1 G.None) 80 160 renderer "assets/fighter1.bmp" tmap smap
   (tmap1', smap1') <- loadFighter (fighterAssetId 1 G.Kick) 110 160 renderer "assets/fighter1K.bmp" tmap1 smap1
-  (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 80 160 renderer "assets/fighter2.bmp" tmap1' smap1'
+  (tmap1'', smap1'') <- loadFighter (fighterAssetId 1 G.Jump) 80 135 renderer "assets/fighter1J.bmp" tmap1' smap1'
+  (tmap1''', smap1''') <- loadFighter (fighterAssetId 1 G.Protect) 80 160 renderer "assets/fighter1P.bmp" tmap1'' smap1''
+  (tmap2, smap2) <- loadFighter (fighterAssetId 2 G.None) 80 160 renderer "assets/fighter2.bmp" tmap1''' smap1'''
   (tmap2', smap2') <- loadFighter (fighterAssetId 2 G.Kick) 110 160 renderer "assets/fighter2K.bmp" tmap2 smap2
+  (tmap2'', smap2'') <- loadFighter (fighterAssetId 2 G.Jump) 80 135 renderer "assets/fighter2J.bmp" tmap2' smap2'
+  (tmap2''', smap2''') <- loadFighter (fighterAssetId 2 G.Protect) 80 160 renderer "assets/fighter2P.bmp" tmap2'' smap2''
   let gameState = G.createGameState sw sh name1 name2
   let kbd = K.createKeyboard
-  gameLoop 60 renderer tmap2' smap2' kbd [] gameState
+  gameLoop 60 renderer tmap2''' smap2''' kbd [] gameState
 
 gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> Log -> GameState -> IO ()
 gameLoop _ _ _ _ _ log (G.GameOver fid) = do
@@ -131,10 +143,10 @@ gameLoop frameRate renderer tmap smap kbd log g@(G.GameIn f1@(Fighter i1 n1 (Coo
   S.displaySprite renderer tmap (SM.fetchSprite (SpriteId "background") smap)
   S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId (fighterAssetId 1 a1)) smap)
                                  (fromIntegral x1)
-                                 (fromIntegral y1))
+                                 (fromIntegral (y1 - (fighterAssetPosY a1))))
   S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId (fighterAssetId 2 a2)) smap)
                                 (fromIntegral (x2 - (fighter2AssetPosX a2)))
-                                (fromIntegral y2))
+                                (fromIntegral (y2 - (fighterAssetPosY a2))))
   ---
   present renderer
   endTime <- time
