@@ -54,14 +54,17 @@ instance Show GameState where
             (if l1 < l2 then "\ESC[31m" else "\ESC[32m") <> show n1 <> "\ESC[0m (" <> show l1 <> ") - " <>
             (if l2 < l1 then "\ESC[31m" else "\ESC[32m") <> show n2 <> "\ESC[0m (" <> show l2 <> ")"
 
+-- Life point must be positive
 prop_inv_fighterState :: FighterState -> Bool
 prop_inv_fighterState KO = True
 prop_inv_fighterState (OK life) = life > 0
 
+-- Fighter.touchF must b False if Fighter.actionF != Kick
 prop_inv_fighterTouch :: Fighter -> Bool
 prop_inv_fighterTouch Fighter { actionF = Kick } = True
-prop_inv_fighterTouch Fighter { actionF = None, touchF = hasTouch } = not hasTouch
+prop_inv_fighterTouch Fighter { actionF = _, touchF = hasTouch } = not hasTouch
 
+-- | Invariant GameState (check fighters status and position in Zone)
 prop_inv_gameState :: GameState -> Bool
 prop_inv_gameState (GameOver _) = True
 prop_inv_gameState GameIn { fighter1 = Fighter { stateF=KO }} = False
@@ -74,9 +77,11 @@ prop_inv_gameState GameIn {
         prop_inv_zone_coord z c1 && prop_inv_zone_coord z c2 &&
         prop_inv_fighterTouch f1 && prop_inv_fighterTouch f2
 
+-- | Fighter smart constructor (Alive with 10 life point)
 createFighter :: Integer -> String -> Integer -> Integer -> Hitbox -> Direction -> Fighter
 createFighter id name x y h d = Fighter (FighterId id) name (Coord x y) h d None (OK 10) False
 
+-- | Game smart constructor
 createGameState :: Integer -> Integer -> String -> String -> GameState
 createGameState sw sh name1 name2 =
     GameIn
@@ -86,6 +91,8 @@ createGameState sw sh name1 name2 =
         5
         True
 
+-- | Fighter movement (= GameState change)
+--  Nb. Check Hitbox safe movement
 moveD :: Integer -> Direction -> GameState -> GameState
 moveD _ _ (GameOver fid) = GameOver fid
 moveD 1 dir (GameIn f1@(Fighter i1 n1 c1 h1 d1 a1 s1 t1) f2 z s p) =
@@ -101,6 +108,8 @@ moveD 2 dir (GameIn f1 f2@(Fighter i2 n2 c2 h2 d2 a2 s2 t2) z s p) =
             True -> GameIn f1 (Fighter i2 n2 c hb d2 a2 s2 t2) z s p
             False -> GameIn f1 f2 z s p
 
+-- | Fighter action management (central procedure!)
+--  Nb. A fighter could touch the other one only if he is in Kick action and the other one in None position
 action :: Integer -> FighterAction -> GameState -> GameState
 action _ _ (GameOver fid) = GameOver fid
 action 1 None (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 None s1 False) f2 z s p
