@@ -105,13 +105,18 @@ action :: Integer -> FighterAction -> GameState -> GameState
 action _ _ (GameOver fid) = GameOver fid
 action 1 None (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 None s1 False) f2 z s p
 action 2 None (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 None s2 False) z s p
-
 action 1 Jump (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 Jump s1 False) f2 z s p
 action 2 Jump (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 Jump s2 False) z s p
-
 action 1 Protect (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 _) f2 z s p) = GameIn (Fighter i1 n1 c1 h1 d1 Protect s1 False) f2 z s p
 action 2 Protect (GameIn f1 (Fighter i2 n2 c2 h2 d2 _ s2 _) z s p) = GameIn f1 (Fighter i2 n2 c2 h2 d2 Protect s2 False) z s p
-
+action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 t1) f2@(Fighter { actionF = Jump }) z s _) =
+    GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 False) f2 z s False
+action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 t1) f2@(Fighter { actionF = Protect }) z s _) =
+    GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 False) f2 z s False
+action 2 Kick (GameIn f1@(Fighter { actionF = Jump }) (Fighter i2 n2 c2 h2 d2 _ s2 t2) z s _) =
+    GameIn f1 (Fighter i2 n2 c2 h2 d2 Kick s2 False) z s False
+action 2 Kick (GameIn f1@(Fighter { actionF = Protect }) (Fighter i2 n2 c2 h2 d2 _ s2 t2) z s _) =
+    GameIn f1 (Fighter i2 n2 c2 h2 d2 Kick s2 False) z s False
 action 1 Kick (GameIn (Fighter i1 n1 c1 h1 d1 _ s1 t1) f2@(Fighter i2 n2 c2 h2 d2 a2 (OK life) t2) z s _) =
     case t1 of
         True -> GameIn (Fighter i1 n1 c1 h1 d1 Kick s1 True) f2 z s False
