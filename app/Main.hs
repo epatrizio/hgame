@@ -65,6 +65,17 @@ loadFighter sid imgW imgH rdr path tmap smap = do
   let smap' = SM.addSprite (SpriteId sid) sprite smap
   return (tmap', smap')
 
+banner :: IO ()
+banner = do
+  putStrLn ""
+  putStrLn "-----------------------------------------"
+  putStrLn "-- PAF Project 2022 - Street Fighter 2 --"
+  putStrLn "-----------------------------------------"
+  putStrLn "Fighter 1 keyboard = Q:Left S:Right Z:Jump W:Protect Space:Kick"
+  putStrLn "Fighter 2 keyboard = <-:Left ->:Right Up:Jump Down:Protect Enter:Kick"
+  putStrLn "You can now enter a custom name (Default is 'Fighter 1/2')"
+  putStrLn "Let's go and be careful! ;)"
+
 fighterAssetId :: Integer -> G.FighterAction -> String
 fighterAssetId 1 G.None = "fighter1"
 fighterAssetId 1 G.Kick = "fighter1K"
@@ -85,6 +96,7 @@ fighterAssetPosY _ = 0
 
 askName :: String -> String -> (String -> String -> Valid String) -> IO String
 askName part defaultStr validateStr = do
+  putStrLn ""
   putStr $ part ++ " : "
   hFlush stdout
   str <- getLine
@@ -101,6 +113,7 @@ main = do
   conf <- loadConfig
   let sw = runReader (Co.getConf Co.screenW) conf
   let sh = runReader (Co.getConf Co.screenH) conf
+  banner
   name1 <- askName "Fighter 1 name" "Fighter 1" validateString
   name2 <- askName "Fighter 2 name" "Fighter 2" validateString
   window <- createWindow "PAF Project - Street Fighter 2" $ defaultWindow { windowInitialSize = V2 (fromIntegral sw) (fromIntegral sh) }
@@ -121,9 +134,10 @@ main = do
 
 gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> Log -> GameState -> IO ()
 gameLoop _ _ _ _ _ log (G.GameOver fid) = do
-  putStrLn $ "\ESC[0m" <> show (G.GameOver fid)
-  putStrLn $ ""
-  putStrLn $ "--- Game history ---"
+  putStrLn ""
+  putStrLn $ "\ESC[34m" <> show (G.GameOver fid)
+  putStrLn ""
+  putStrLn $ "\ESC[0m--- Game history ---"
   for_ (fmap id (reverse log)) putStrLn
   exitSuccess
 gameLoop frameRate renderer tmap smap kbd log g@(G.GameIn f1@(Fighter i1 n1 (Coord x1 y1) h1 d1 a1 (G.OK l1) t1) f2@(Fighter i2 n2 (Coord x2 y2) h2 d2 a2 (G.OK l2) t2) z speed print) = do
@@ -131,10 +145,10 @@ gameLoop frameRate renderer tmap smap kbd log g@(G.GameIn f1@(Fighter i1 n1 (Coo
   events <- pollEvents
   let (_,log') =  if (print) then (runState (pushLog (show g)) log) else ((),log)
   if (print) then do
+    putStrLn ""
     putStrLn $ "\ESC[0mFight in progress"
     putStrLn $ (if l1 < l2 then "\ESC[31m" else "\ESC[0m") <> show f1
     putStrLn $ (if l2 < l1 then "\ESC[31m" else "\ESC[0m") <> show f2
-    putStrLn $ ""
   else
     pure ()
   let kbd' = K.handleEvents events kbd
