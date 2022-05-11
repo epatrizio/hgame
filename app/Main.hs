@@ -48,6 +48,7 @@ import qualified Config as Co
 
 import Utils
 
+-- Warning : Config is hardcoded
 loadConfig :: IO Configuration
 loadConfig = return (Co.Config { Co.screenW = 1024, Co.screenH = 531})
 
@@ -76,6 +77,8 @@ banner = do
   putStrLn "You can now enter a custom name (Default is 'Fighter 1/2')"
   putStrLn "Let's go and be careful! ;)"
 
+-- | Get fighter asset id by fighter id and fighter action
+--  (4 actions, 2 fighters = 8 images)
 fighterAssetId :: Integer -> G.FighterAction -> String
 fighterAssetId 1 G.None = "fighter1"
 fighterAssetId 1 G.Kick = "fighter1K"
@@ -86,10 +89,12 @@ fighterAssetId 2 G.Kick = "fighter2K"
 fighterAssetId 2 G.Jump = "fighter2J"
 fighterAssetId 2 G.Protect = "fighter2P"
 
+-- Warning : images gap are hardcoded
 fighter2AssetPosX :: G.FighterAction -> Integer
 fighter2AssetPosX G.Kick = 30   -- (= 110-80)
 fighter2AssetPosX _ = 0
 
+-- Warning : images gap are hardcoded
 fighterAssetPosY :: G.FighterAction -> Integer
 fighterAssetPosY G.Jump = 135   -- (Jump image height)
 fighterAssetPosY _ = 0

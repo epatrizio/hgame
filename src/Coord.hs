@@ -45,6 +45,7 @@ prop_move_leftRight (Coord x y) i = move (move (Coord x y) (Mov R i)) (Mov L i) 
 prop_move_upDown :: Coordinates -> Integer -> Bool
 prop_move_upDown (Coord x y) i = move (move (Coord x y) (Mov U i)) (Mov D i) == (Coord x y)
 
+-- if out of zone after movement, do not move!
 moveSafe :: Zone -> Coordinates -> Movement -> Coordinates
 moveSafe (Zone _ h) (Coord x y) (Mov U u)
     | y+u <= h = move (Coord x y) (Mov U u)
@@ -59,7 +60,7 @@ moveSafe (Zone w _) (Coord x y) (Mov L l)
     | x-l >= 0 = move (Coord x y) (Mov L l)
     | otherwise = Coord x y
 
--- Int nb mvt > 0
+-- Int nb mvt must be positive
 prop_inv_movement :: Movement -> Bool
 prop_inv_movement (Mov _ n) = n>=0
 
